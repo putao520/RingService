@@ -1,0 +1,39 @@
+[package]
+name = "RingService"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+hudsucker = { path = "../hudsucker", features = ["decoder", "http2", "rcgen-ca", "rustls-client"] }
+
+tracing = "0.1.40"
+tokio = { version = "1.37.0", features = ["full"] }
+tracing-subscriber = "0.3.18"
+rcgen = { version = "0.13.1", features = ["pem", "crypto"] }
+ring = "0.17.8"
+machineid-rs = "1.2.4"
+rand = "0.8.5"
+anyhow = "1.0.86"
+windows-sys = { version = "0.52.0", features = ["Win32_Foundation", "Win32_Security", "Win32_System_Threading", "Win32_Security_Cryptography"] }
+pem = "3.0.4"
+chrono = "0.4.38"
+serde_json = "1.0.117"
+time = "0.3.36"
+hyper-rustls = { version = "0.26.0", default-features = false, features = ["http1", "http2", "ring", "tls12",
+    "webpki-tokio", "webpki-roots"] }
+hyper = "1.1.0"
+tower-service = "0.3.2"
+futures-util = "0.3.30"
+openssl = "0.10.64"
+hex = "0.4.3"
+mimalloc = "0.1.42"
+once_cell = "1.19.0"
+dashmap = { version = "5.5.3", features = ["serde"] }
+serde = { version = "1.0.203", features = ["derive"] }
+serde_yaml = "0.9.34"
+reqwest = { version = "0.12.4", features = ["json", "socks", "gzip", "brotli", "deflate", "zstd"] }
+aead = "0.5.2"
+aes-gcm = "0.10.3"
+sha2 = "0.10.8"
+crypto = "0.5.1"
+env_logger = "0.11.3"

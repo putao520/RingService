@@ -1,0 +1,109 @@
+# Pixiv 网站规则
+pixiv.net:
+
+pixiv.org:
+
+pximg.net:
+
+# ========================== 下面游戏佬常用网站 ==========================
+steamcommunity.com:
+
+steampowered.com:
+
+steamstatic.com:
+
+twitch.tv:
+  rules:
+    assets:
+      p: static.twitchcdn.net
+
+ttvnw.net:
+
+fandom.com:
+
+nexusmods.com:
+
+nexus-cdn.com:
+
+live.com:
+
+mega.io:
+
+mega.nz:
+
+dropbox.com:
+
+dropboxstatic.com:
+
+dropboxusercontent.com:
+
+
+# ========================== 下面是程序员常用网站 ==========================
+# golang 网站规则
+golang.org:
+
+# docker 网站规则
+docker.com:
+
+# npmjs.com 网站规则
+npmjs.com:
+
+# jetbrains.com 网站规则
+jetbrains.com:
+
+# github 网站规则
+github.com:
+
+github.io:
+
+github.dev:
+
+githubusercontent.com:
+
+githubassets.com:
+
+vercel.app:
+
+appcenter.ms:
+
+# ========================== 下面是设计师常用网站 ==========================
+pinterest.com:
+
+pinimg.com:
+
+dribbble.com:
+
+artstation.com:
+
+# ========================== 下面是常用网站设置 ==========================
+akamaihd.net:
+
+gstatic.com:
+
+gravatar.com:
+
+imgur.com:
+
+googleusercontent.com:
+
+bootstrapcdn.com:
+
+t.co:
+  nsfw: 4
+
+twitter.com:
+  nsfw: 4
+
+ads-twitter.com:
+  nsfw: 4
+
+youtube.com:
+  nsfw: 4
+
+google.com:
+  nsfw: 4
+
+microsoft.com:
+  rules:
+    data:
+      nsfw: 4
