@@ -1,109 +1,116 @@
-# Pixiv 网站规则
 pixiv.net:
-
 pixiv.org:
-
-pximg.net:
-
-# ========================== 下面游戏佬常用网站 ==========================
-steamcommunity.com:
-
-steampowered.com:
-
-steamstatic.com:
-
-twitch.tv:
-  rules:
-    assets:
-      p: static.twitchcdn.net
-
-ttvnw.net:
-
-fandom.com:
-
-nexusmods.com:
-
-nexus-cdn.com:
-
-live.com:
-
-mega.io:
-
-mega.nz:
-
-dropbox.com:
-
-dropboxstatic.com:
-
-dropboxusercontent.com:
-
-
-# ========================== 下面是程序员常用网站 ==========================
-# golang 网站规则
 golang.org:
-
-# docker 网站规则
-docker.com:
-
-# npmjs.com 网站规则
-npmjs.com:
-
-# jetbrains.com 网站规则
-jetbrains.com:
-
-# github 网站规则
-github.com:
-
-github.io:
-
-github.dev:
-
-githubusercontent.com:
-
-githubassets.com:
-
-vercel.app:
-
-appcenter.ms:
-
-# ========================== 下面是设计师常用网站 ==========================
-pinterest.com:
-
-pinimg.com:
-
-dribbble.com:
-
-artstation.com:
-
-# ========================== 下面是常用网站设置 ==========================
-akamaihd.net:
-
-gstatic.com:
-
-gravatar.com:
-
-imgur.com:
-
-googleusercontent.com:
-
-bootstrapcdn.com:
-
+ttvnw.org:
+akamaihd.org:
 t.co:
   nsfw: 4
 
+pximg.net:
+akamaihd.net:
+ttvnw.net:
+  rules:
+    hls:
+      rules:
+        abs:
+          p: science-edge-external-prod-73889260.us-west-2.elb.amazonaws.com
+    usher:
+      nsfw: 9
+
+steamcommunity.com:
+steampowered.com:
+steamstatic.com:
+fandom:
+  p: wikia.com
+nexusmods.com:
+nexus-cdn.com:
+live.com:
+dropbox.com:
+dropboxstatic.com:
+dropboxusercontent.com:
+docker.com:
+npmjs.com:
+jetbrains.com:
+github.com:
+githubusercontent.com:
+githubassets.com:
+pinterest.com:
+pinimg.com:
+dribbble.com:
+artstation.com:
+gstatic.com:
+  rules:
+    fonts:
+      p: gstatic.loli.net
+gravatar.com:
+  p: 192.0.80.239
+imgur.com:
+googleusercontent.com:
+  rules:
+    themes:
+      p: themes.loli.net
+googleapis.com:
+  rules:
+    ajax:
+      p: ajax.loli.net
+    fonts:
+      p: fonts.loli.net
+bootstrapcdn.com:
+google.com:
+  paths:
+    recaptcha:
+      p: www.recaptcha.net
+arkoselabs:
+  rules:
+    client-api:
+      p: roblox-api.arkoselabs.com.cdn.cloudflare.net
+    epic-games-api:
+      p: roblox-api.arkoselabs.com.cdn.cloudflare.net
+    cdn:
+      p: roblox-api.arkoselabs.com.cdn.cloudflare.net
+    prod-ireland:
+      p: roblox-api.arkoselabs.com.cdn.cloudflare.net
+
+hcaptcha.com:
 twitter.com:
   nsfw: 4
-
 ads-twitter.com:
   nsfw: 4
-
 youtube.com:
   nsfw: 4
 
-google.com:
-  nsfw: 4
+ext-twitch.tv:
+  p: d12b3e89c9703p.cloudfront.net
 
-microsoft.com:
+twitch.tv:
+  r4: 146.75.114.167
   rules:
-    data:
-      nsfw: 4
+    passport:
+      p: passttv.steam302.xyz
+    assets:
+      p: static.twitchcdn.net
+    clips-media-assets2:
+      p: d2xmjdvx03ij56.cloudfront.net
+    id-cdn:
+      p: idcdnttv.steam302.xyz
+    id:
+      p: id.twitch.tv
+    pubsub-edge:
+      p: 890c88446f94f25bd32a3f1e0df6c120.steam302.xyz
+    vod-secure:
+      p: d12b3e89c9703p.cloudfront.net
+    music:
+      p: d12b3e89c9703p.cloudfront.net
+    chat:
+      p: 5a895ed07aed1b254ee21cd78958ae0b.steam302.xyz
+
+mega.io:
+mega.nz.io:
+github.io:
+
+github.dev:
+vercel.dev:
+
+appcenter.ms:
+
+vercel.app:

@@ -29,3 +29,8 @@ pub fn ipv4_to_u32(ip: &str) -> Result<u32> {
     let addr = Ipv4Addr::from_str(ip)?;
     Ok(u32::from(addr))
 }
+
+pub fn print_ip(ip_num: u32) -> String {
+    let ip = Ipv4Addr::from(ip_num);
+    ip.to_string()
+}

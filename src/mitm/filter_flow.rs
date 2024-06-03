@@ -7,6 +7,7 @@ use dashmap::DashMap;
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use tokio::fs;
+use tokio::sync::RwLock;
 
 use crate::utils::strings::ipv4_to_u32;
 
@@ -80,16 +81,15 @@ where
 }
 
 type FilterFlowDescMap = DashMap<String, Option<FilterFlowDesc>>;
-pub static SHARE_FILTER_FLOW_DESC: Lazy<FilterFlowDescMap> = Lazy::new(|| DashMap::new());
+pub static SHARE_FILTER_FLOW_DESC: Lazy<RwLock<FilterFlowDescMap>> =
+    Lazy::new(|| RwLock::new(DashMap::new()));
 
-static REPLACE_RULES_MUTEX: Lazy<Mutex<()>> = Lazy::new(|| Mutex::new(())); // 完整替换规则锁
-
-fn refresh_filter_flow(rules_str: &str) -> Result<()> {
+async fn refresh_filter_flow(rules_str: &str) -> Result<()> {
     let new_map: FilterFlowDescMap = serde_yaml::from_str(rules_str)?;
-    let _lock = REPLACE_RULES_MUTEX.lock().unwrap();
-    SHARE_FILTER_FLOW_DESC.clear();
+    let desc = SHARE_FILTER_FLOW_DESC.write().await;
+    desc.clear();
     for it in new_map.iter() {
-        SHARE_FILTER_FLOW_DESC.insert(it.key().clone(), it.value().clone());
+        desc.insert(it.key().clone(), it.value().clone());
     }
     Ok(())
 }
@@ -111,13 +111,40 @@ fn search_rules(
             }
             return Some(desc.clone());
         }
-        return Some(FilterFlowDesc::default());
     }
     None
 }
-pub fn start_search_rules(host: &str) -> Option<FilterFlowDesc> {
-    let mut spl = find_match_suffix(host, '.');
-    search_rules(&SHARE_FILTER_FLOW_DESC, &mut spl)
+pub async fn start_search_rules(host: &str) -> Option<FilterFlowDesc> {
+    let mut dot_idx_arr = find_match_suffix(host, '.');
+
+    // 根据 dot 的位置计算切片并查询
+    loop {
+        let idx = dot_idx_arr.pop();
+        match idx {
+            None => break,
+            Some(i) => {
+                let key = &host[i..];
+                let desc = SHARE_FILTER_FLOW_DESC.read().await;
+                if desc.contains_key(key) {
+                    if let Some(item) = desc.get(key) {
+                        if let Some(desc) = item.value() {
+                            if let Some(rules) = &desc.rules {
+                                let r_str = &host[..i];
+                                let mut spl = find_path_suffix(r_str, '.');
+                                if let Some(d) = search_rules(rules, &mut spl) {
+                                    return Some(d);
+                                }
+                            }
+                            return Some(desc.clone());
+                        }
+                    }
+                    return Some(FilterFlowDesc::default());
+                }
+            }
+        }
+    }
+
+    None
 }
 
 // 搜索路径规则
@@ -140,7 +167,7 @@ fn search_paths(
     None
 }
 pub fn start_search_paths(path: &str, desc: &FilterFlowDesc) -> Option<FilterFlowDesc> {
-    let mut spl = find_match_suffix(path, '/');
+    let mut spl = find_path_suffix(path, '/');
     if let Some(paths) = &desc.paths {
         return search_paths(paths, &mut spl);
     }
@@ -164,7 +191,24 @@ pub fn start_search_paths(path: &str, desc: &FilterFlowDesc) -> Option<FilterFlo
 //     query_local_dns(host).await
 // }
 
-fn find_match_suffix(host: &str, c: char) -> Vec<&str> {
+fn find_match_suffix(host: &str, c: char) -> Vec<usize> {
+    let mut r = vec![0];
+    let mut p = host;
+    let mut s = 0;
+    loop {
+        if let Some(index) = p.find(c) {
+            let ps = index + 1;
+            s += ps;
+            r.push(s);
+            p = &p[ps..];
+        } else {
+            break;
+        }
+    }
+    r
+}
+
+fn find_path_suffix(host: &str, c: char) -> Vec<&str> {
     let mut r = Vec::new();
     let mut p = host;
     loop {
@@ -173,13 +217,52 @@ fn find_match_suffix(host: &str, c: char) -> Vec<&str> {
             r.push(&p[..index]);
             p = &p[(index + 1)..];
         } else {
+            r.push(p);
             break;
         }
     }
     r
 }
 
+pub fn print_flow_desc(key: &str, desc: &FilterFlowDesc) {
+    println!(
+        "key: {:?}=============================================",
+        key
+    );
+    println!("nsfw: {:?}", desc.nsfw);
+    println!("proxy: {:?}", desc.proxy);
+    println!("sni: {:?}", desc.sni);
+    println!("host: {:?}", desc.host);
+    println!("redirect_v4: {:?}", desc.redirect_v4);
+    if let Some(rules) = &desc.rules {
+        for it in rules.iter() {
+            println!("rules: {:?}", it.key());
+        }
+    }
+    if let Some(paths) = &desc.paths {
+        for it in paths.iter() {
+            println!("paths: {:?}", it.key());
+        }
+    }
+}
+
 pub async fn load_test_rule() -> Result<()> {
     let rules = fs::read_to_string("test_rule.yaml").await?;
-    refresh_filter_flow(rules.as_str())
+    refresh_filter_flow(rules.as_str()).await
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_find_match_suffix() {
+        let s = "data.s.msn.com.cn";
+        let arr = find_match_suffix(s, '.');
+        for i in arr.clone() {
+            let p: &str = &s[i..];
+            println!("string: {}", p);
+        }
+        assert_eq!(arr, vec![0, 5, 7, 11, 15]);
+    }
 }

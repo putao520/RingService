@@ -4,10 +4,10 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-hudsucker = { path = "../hudsucker", features = ["decoder", "http2", "rcgen-ca", "rustls-client"] }
-
+hudsucker = { path = "../hudsucker", features = ["decoder", "http2", "rustls-client", "openssl-ca"] }
+merge-executers = { path = "../merge-executers" }
 tracing = "0.1.40"
-tokio = { version = "1.37.0", features = ["full"] }
+tokio = { version = "1.38.0", features = ["full"] }
 tracing-subscriber = "0.3.18"
 rcgen = { version = "0.13.1", features = ["pem", "crypto"] }
 ring = "0.17.8"
@@ -19,8 +19,8 @@ pem = "3.0.4"
 chrono = "0.4.38"
 serde_json = "1.0.117"
 time = "0.3.36"
-hyper-rustls = { version = "0.26.0", default-features = false, features = ["http1", "http2", "ring", "tls12",
-    "webpki-tokio", "webpki-roots"] }
+hyper-rustls = { version = "0.26.0", default-features = false, features = ["http2", "tls12",
+    "webpki-tokio", "webpki-roots", "rustls-native-certs"] }
 hyper = "1.1.0"
 tower-service = "0.3.2"
 futures-util = "0.3.30"
@@ -37,3 +37,4 @@ aes-gcm = "0.10.3"
 sha2 = "0.10.8"
 crypto = "0.5.1"
 env_logger = "0.11.3"
+rustls-native-certs = "0.7.0"

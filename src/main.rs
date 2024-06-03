@@ -1,6 +1,7 @@
 #![feature(let_chains)]
 
 use mimalloc::MiMalloc;
+use std::env;
 use tokio::runtime::Builder;
 
 use crate::mitm::filter_flow::load_test_rule;

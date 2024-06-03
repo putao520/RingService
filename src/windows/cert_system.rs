@@ -165,14 +165,14 @@ impl Drop for CertSystem {
     }
 }
 
-async fn pem_parse_pfx(pfx_root: &[u8], password: &str) -> Result<(String, String)> {
+async fn pem_parse_pfx(pfx_root: &[u8], password: &str) -> Result<(Vec<u8>, Vec<u8>)> {
     // 解析 pfx
     let pfx = Pkcs12::from_der(pfx_root)?;
     let pfx = pfx.parse2(password)?;
     let pkey = pfx.pkey.unwrap().private_key_to_pem_pkcs8()?;
     let cert = pfx.cert.unwrap().to_pem()?;
 
-    Ok((String::from_utf8(cert)?, String::from_utf8(pkey)?))
+    Ok((cert, pkey))
 }
 
 async fn der_parse_pfx(pfx_root: &[u8], password: &str) -> Result<(Vec<u8>, Vec<u8>)> {
@@ -286,7 +286,7 @@ impl CertSystem {
         self.cls.print()
     }
 
-    pub async fn get_cert_pem(&self) -> Result<(String, String)> {
+    pub async fn get_cert_pem(&self) -> Result<(Vec<u8>, Vec<u8>)> {
         pem_parse_pfx(self.pfx_root.as_slice(), self.password.as_str()).await
     }
 }

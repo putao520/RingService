@@ -4,6 +4,7 @@ use dashmap::DashMap;
 use once_cell::sync::Lazy;
 
 use crate::utils::aes::AES_CODER;
+use crate::utils::strings::print_ip;
 use crate::utils::u32_sec::xor_u32;
 
 static DNS_CACHE: Lazy<DashMap<String, u32>> = Lazy::new(|| DashMap::new());
@@ -23,19 +24,15 @@ static DNS_CACHE: Lazy<DashMap<String, u32>> = Lazy::new(|| DashMap::new());
 //     ip
 // }
 
-#[cfg(not(debug_assertions))]
 static DNS_LOCAL_SERVER: &str = "https://dns.gscyun.com/q";
 
-#[cfg(debug_assertions)]
-// static DNS_LOCAL_SERVER: &str = "http://127.0.0.1:8080/q";
-static DNS_LOCAL_SERVER: &str = "https://dns.gscyun.com/q";
 static DNS_CLIENT: Lazy<Arc<reqwest::Client>> = Lazy::new(|| Arc::new(reqwest::Client::new()));
 pub async fn query_local_dns(host: &str) -> anyhow::Result<u32> {
-    let sec_domain = AES_CODER.encrypt(host.as_bytes()).unwrap();
     if DNS_CACHE.contains_key(host) {
         return Ok(*DNS_CACHE.get(host).unwrap().value());
     }
 
+    let sec_domain = AES_CODER.encrypt(host.as_bytes()).unwrap();
     let cli = Arc::clone(&DNS_CLIENT);
     let res = cli
         .post(DNS_LOCAL_SERVER)
@@ -55,6 +52,9 @@ pub async fn query_local_dns(host: &str) -> anyhow::Result<u32> {
     if ip_no != 0 {
         DNS_CACHE.insert(host.to_string(), ip_no);
     }
+
+    #[cfg(debug_assertions)]
+    println!("DNS: {}->{}", host, print_ip(ip_no));
 
     Ok(ip_no)
 }
