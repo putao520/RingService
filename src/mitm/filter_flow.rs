@@ -1,12 +1,16 @@
+use std::future::Future;
 use std::net::Ipv4Addr;
 use std::str::FromStr;
 use std::sync::Mutex;
 
-use anyhow::Result;
+use crate::conf::transport::{Transport, TransportCallback, TransportResult};
+use crate::mitm::gsc_dns_resolver::refresh_region;
+use anyhow::{Error, Result};
 use dashmap::DashMap;
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use tokio::fs;
+use tokio::runtime::Runtime;
 use tokio::sync::RwLock;
 
 use crate::utils::strings::ipv4_to_u32;
@@ -84,7 +88,14 @@ type FilterFlowDescMap = DashMap<String, Option<FilterFlowDesc>>;
 pub static SHARE_FILTER_FLOW_DESC: Lazy<RwLock<FilterFlowDescMap>> =
     Lazy::new(|| RwLock::new(DashMap::new()));
 
-async fn refresh_filter_flow(rules_str: &str) -> Result<()> {
+pub struct FilterFlow {}
+impl TransportCallback for FilterFlow {
+    fn invoke(&self, data: String) -> TransportResult {
+        Box::pin(async move { refresh_filter_flow(data.as_str()).await })
+    }
+}
+
+pub async fn refresh_filter_flow(rules_str: &str) -> Result<()> {
     let new_map: FilterFlowDescMap = serde_yaml::from_str(rules_str)?;
     let desc = SHARE_FILTER_FLOW_DESC.write().await;
     desc.clear();
@@ -245,6 +256,8 @@ pub fn print_flow_desc(key: &str, desc: &FilterFlowDesc) {
         }
     }
 }
+
+pub static RULES_THEME_NAME: &str = "client_rules";
 
 pub async fn load_test_rule() -> Result<()> {
     let rules = fs::read_to_string("test_rule.yaml").await?;

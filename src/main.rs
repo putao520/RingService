@@ -1,13 +1,16 @@
 #![feature(let_chains)]
+#![feature(fn_traits)]
 
 use mimalloc::MiMalloc;
-use std::env;
 use tokio::runtime::Builder;
 
-use crate::mitm::filter_flow::load_test_rule;
+use crate::conf::transport::Transport;
+use crate::mitm::filter_flow::{FilterFlow, RULES_THEME_NAME};
+use crate::mitm::gsc_dns_resolver::{REGIONS, REGION_THEME_NAME};
 use crate::mitm::mitm::mitm_start;
 use crate::mitm::root_ca::RootCa;
 
+mod conf;
 mod extranal;
 mod mitm;
 mod utils;
@@ -31,10 +34,18 @@ fn main() {
     // 使用创建的运行时运行异步代码
     runtime.block_on(async {
         // 加载规则
-        load_test_rule().await.unwrap();
+        let mut conf_watcher = Transport::new().await.unwrap();
+        conf_watcher
+            .subscribe(RULES_THEME_NAME, Box::new(FilterFlow {}))
+            .await
+            .unwrap();
+        conf_watcher
+            .subscribe(REGION_THEME_NAME, Box::new(REGIONS {}))
+            .await
+            .unwrap();
 
         // 创建一个 tokio 的mpsc通道
-        let (tx, mut rx) = tokio::sync::mpsc::channel(1);
+        let (_, rx) = tokio::sync::mpsc::channel(1);
 
         let mut root_ca = RootCa::new().await.unwrap();
 

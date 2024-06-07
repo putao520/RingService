@@ -1,19 +1,24 @@
-use crate::utils::aes::AES_CODER;
-use crate::utils::strings::print_ip;
-use crate::utils::u32_sec::xor_u32;
-use anyhow::Result;
+use std::future::Future;
+use std::net::{Ipv4Addr, SocketAddrV4};
+use std::sync::Arc;
+use std::time::Duration;
+
+use anyhow::{Error, Result};
 use dashmap::DashMap;
 use futures_util::future;
 use merge_executers::MergeExecutes;
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
-use std::net::{Ipv4Addr, SocketAddrV4};
-use std::sync::{Arc, Mutex};
-use std::time::Duration;
 use tokio::fs;
 use tokio::net::TcpStream;
 use tokio::sync::RwLock;
 use tokio::time::timeout;
+
+use crate::conf::transport::{Transport, TransportCallback, TransportResult};
+use crate::mitm::filter_flow::refresh_filter_flow;
+use crate::utils::aes::AES_CODER;
+use crate::utils::strings::print_ip;
+use crate::utils::u32_sec::xor_u32;
 
 #[derive(Serialize, Deserialize, Debug)]
 struct Question {
@@ -52,8 +57,8 @@ struct DnsResponse {
 
 static REGION_RULE: Lazy<RwLock<Vec<String>>> = Lazy::new(|| RwLock::new(Vec::new()));
 static DNS_CACHE: Lazy<DashMap<String, u32>> = Lazy::new(|| DashMap::new());
-// static DNS_LOCAL_SERVER: &str = "https://pure-dns.gscyun.com/q";
-static DNS_LOCAL_SERVER: &str = "http://127.0.0.1:8080/q";
+static DNS_LOCAL_SERVER: &str = "https://pure-dns.gscyun.com/q";
+// static DNS_LOCAL_SERVER: &str = "http://127.0.0.1:8080/q";
 static DNS_CLIENT: Lazy<Arc<reqwest::Client>> = Lazy::new(|| Arc::new(reqwest::Client::new()));
 // 归并执行器
 static MERGER_EXECUTE: Lazy<MergeExecutes<u32>> = Lazy::new(|| MergeExecutes::new());
@@ -141,10 +146,18 @@ pub async fn load_test_region() -> Result<()> {
     let region = fs::read_to_string("test_region.yaml").await?;
     refresh_region(region.as_str()).await
 }
+pub struct REGIONS {}
+impl TransportCallback for REGIONS {
+    fn invoke(&self, data: String) -> TransportResult {
+        Box::pin(async move { refresh_region(data.as_str()).await })
+    }
+}
+pub static REGION_THEME_NAME: &str = "regions";
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
     #[tokio::test]
     async fn test_query_local_dns() {
         load_test_region().await.unwrap();

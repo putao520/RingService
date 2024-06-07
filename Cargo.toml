@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 hudsucker = { path = "../hudsucker", features = ["decoder", "http2", "rustls-client", "openssl-ca"] }
-merge-executers = { path = "../merge-executers" }
+merge-executers = { git = "https://github.com/putao520/merge-executers" }
 tracing = "0.1.40"
 tokio = { version = "1.38.0", features = ["full"] }
 tracing-subscriber = "0.3.18"
